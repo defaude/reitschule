@@ -28,9 +28,11 @@ Master data includes:
 ## Domain entities
 
 - **School**: The riding school.
-- **Horse**: Information on each horse that's being used for riding `lessons` with `students`.
+- **Horse**: Information on each horse that's being used for riding `lessons` with `students`. A horse can either be
+  "active" or "inactive". Only active horses show up as options in the `trainer-app` for new `participation` entries.
 - **Lesson**: Is created by a `trainer` (or an `admin` if the trainer misses to input their data on time). It contains
-  the date and timespan when the `trainer` held a lesson for one or more `students`.
+  the date and timespan when the `trainer` held a lesson for one or more `students`. `Trainers` can only see and 
+  manipulate their onw lessons and `participation` entries - and only before the month has been "closed" by an `admin`.
 - **Participation**: A `trainer` (or `admin`) must input each `student` that participated in a `lesson` with which horse
   and for how long (i.e. how many `quota` units the student used). For example: The trainer creates a `lesson` that took
   90 minutes. `Students` Anna, Bob and Charlotte participated overall. Anna was there for the full 90 minutes, Bob only
@@ -38,11 +40,15 @@ Master data includes:
   Charlotte's is reduced by 1. A `student's` participation in a `lesson` is always tied to one of the `horses`. A
   `student` can only have one participation entry belonging to a `lesson`.
 - **Admin**: A user that is allowed to log in to the `admin-app`. The `api` allows them CRUD basically all data. They
-  belong to the `school` and are trusted.
+  belong to the `school` and are trusted. An admin user can be made inactive, even without deleting the entry. Inactive
+  admins can not log in to the `admin-app` and not access or modify any data in the system.
 - **Trainer**: A user that can only log in to the `trainer-app`. The `api` only allows them to access the information
   they need to work with their `lessons` / `horses` / `students`, but nothing else. They are affiliated with the
-  `school`, but are generally considered external contractors.
+  `school`, but are generally considered external contractors. Just like admins, trainers can be made inactive and lose
+  all access to the `trainer-app` and any data if that's the case.
 - **Student**: Has a `contract` with a specific monthly `quota`. Participates in `lessons` with `trainers` and `horses`.
+  A student can either be "active" or "inactive". Only active students show up in the `trainer-app` as possible
+  candidates when a `participation` entry is created.
 - **Contract**: Agreement between a `student` and the `school`. It specifies the default `quota` that a `student` is
   given each month. A contract always has a start date. If it's the current, active contract, there is no end date. A
   contract can be terminated (deactivated), at which point the end date is stored. A `student` can only have one active
@@ -82,12 +88,11 @@ Each lesson a student participates in a lesson (i.e. a trainer or an admin adds 
 If the participation entry gets modified, the transaction is updated, as well. No additional timestamp for the change
 needs to be recorded. If the participation entry is removed, the transaction is removed as well.
 
-
 ## Closing & Report generation
 
 After the end of a month, an admin can close the month's data regarding lessons and participation. After this moment,
-the month's data becomes immutable for trainers. An admin can add corrective lesson or participation entries if the
-trainer's data was incomplete or incorrect, even if the month has already been closed.
+the month's data becomes immutable for trainers. An admin can add, edit, or remove lesson or participation entries if
+the trainer's data was incomplete or incorrect, even if the month has already been closed.
 
 A report is not a persisted document, but a manually-triggered data aggregation. Reports are displayed in the
 `admin-app` directly in a table, with frontend-only filtering and sorting for usability. No export or download
@@ -100,7 +105,6 @@ Some examples of reports are (but there might be other use-cases in the future):
 - list of all quota transactions of a specific student's quota (over a longer period, maybe even the whole contract
   duration)
 
-
 ## PII, data minimization, data retention
 
 Only the absolutely minimal amount of personally identifiable information (PII) is collected and stored, where it's
@@ -108,14 +112,14 @@ needed for the school's business processes. This includes admin's and trainer's 
 students, only the name is stored. Every other information the school might have on any person, be it admin, trainer, or
 student, is not stored in this system, but needs to be maintained elsewhere!
 
-Trainers can see all data on students and horses. No fine-grained access control mechanism needed.
+Trainers can see all data on active students and active horses. No finer-grained access control mechanism needed.
 
 By default, no information is deleted. When an admin, trainer or student stops interacting with the school, their
-information remains as it's part of the school's business processes. When personal data must no longer be retained,
-identifying attributes are anonymized while non-personal historical records remain intact. This means database entries
-do not get deleted, but updated so that no PII is retained. For example, a username gets anonymized to something like
-"<<deleted user>>", maybe with a sequence number. This way, the `admin-app` can still show historical data, albeit
-without the deleted PII.  Users that have been removed this way can not be selected as participants in lessons anymore.
+information remains as it's part of the school's business processes. The respective data object is marked as "inactive",
+though. When personal data must no longer be retained, identifying attributes are anonymized while non-personal
+historical records remain intact. This means database entries do not get deleted, but updated so that no PII is
+retained. For example, a username gets anonymized to something like "<<deleted user>>", maybe with a sequence number.
+This way, the `admin-app` can still show historical data, albeit without the deleted PII.
 
 ## Authentication
 
