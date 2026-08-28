@@ -10,7 +10,7 @@ information about lessons that took place (with which students, with which horse
 while still on-site. Plus another app that allows the school's admins to gather all information, generate reports
 (per-trainer, per-student, per-horse, etc.), and maintain master data.
 
-Note that this system is **not** intended as a compensation calculator for trainers! This system only tracks the amount
+Note that this system is **not** intended as a compensation calculator for trainers! This system only tracks the number
 of lessons a trainer provided. Compensation, contractual details, and so on, must be tracked elsewhere.
 
 Master data includes:
@@ -32,7 +32,7 @@ Master data includes:
 ## Domain entities
 
 - **School**: The riding school. The whole system runs in the context of one school. If another school wants to use this
-  system, a completely separate, independent deployment needs to be set up
+  system, a completely separate, independent deployment needs to be set up.
 - **Horse**: Information on each horse that's being used for riding `lessons` with `students`. A horse can either be
   "active" or "inactive". Only active horses show up as options in the `trainer-app` for new `participation` entries.
 - **Lesson**: Is created by a `trainer` (or an `admin` if the trainer misses to input their data on time). It contains
@@ -74,7 +74,7 @@ Master data includes:
     - "participation" when the `student` used one or more units of their quota
     - "manual" correction entry entered by an `admin`.
   - Unit delta: A positive or negative integer representing the amount of units added to or removed from the `quota`.
-  - Issuer: Empty for all but "manual" entries. Populated with the `admin's` username that created the correction entry.
+  - Issuer: Empty for all but "manual" entries. Reference to the `admin` that created the correction entry.
   - Description: Empty for all but "manual" entries. Free-text field the `admin` may or may not fill when creating a
     correction.
 
@@ -84,17 +84,17 @@ If a student has an active contract at the beginning of a month, a "contract" tr
 student's quota by the amount that is defined in the contract. Such a "contract" transaction is only created once per
 contract per month.
 
-If a new contract starts on the 1st day of the month, the automatic transaction to top up the student's quote is added.
+If a new contract starts on the 1st day of the month, the automatic transaction to top up the student's quota is added.
 
 If a contract starts at a later day in the month, no automatic transaction is added in that month. In this case, an
 admin needs to create an appropriate transaction for the onboarding of the student manually. When a contract ends, the
 quota stays unchanged. The quota _can_ become negative, but the `admin-app` will show a warning message banner if this
 is the case (so that admins can take action if needed).
 
-Each lesson a student participates in (i.e. a trainer or an admin adds a participation entry), results in a
-"participation" transaction with the amount of units from the participation entry. It reduces the student's quota
-accordingly. If the participation entry gets modified, the transaction is updated, as well. No additional timestamp for
-the change needs to be recorded. If the participation entry is removed, the transaction is removed as well.
+Each participation entry, results in a "participation" transaction with the amount of units from the participation
+entry. It reduces the student's quota accordingly. If the participation entry gets modified, the transaction is updated,
+as well. No additional timestamp for the change needs to be recorded. If the participation entry is removed, the
+transaction is removed as well.
 
 ## Closing & Report generation
 
@@ -123,12 +123,12 @@ student, is not stored in this system, but needs to be maintained elsewhere!
 
 Trainers can see all data on active students and active horses. No finer-grained access control mechanism needed.
 
-By default, no information is deleted. When an admin, trainer or student stops interacting with the school, their
-information remains as it's part of the school's business processes. The respective data object is marked as "inactive",
-though. When personal data must no longer be retained, identifying attributes are anonymized while non-personal
-historical records remain intact. This means database entries do not get deleted, but updated so that no PII is
-retained. For example, a username gets anonymized to something like "<<deleted user>>", maybe with a sequence number.
-This way, the `admin-app` can still show historical data, albeit without the deleted PII.
+By default, master-data records are not deleted. When an admin, trainer or student stops interacting with the school,
+their information remains as it's part of the school's business processes. The respective data object is marked as
+"inactive", though. When personal data must no longer be retained, identifying attributes are anonymized while
+non-personal historical records remain intact. This means database entries do not get deleted, but updated so that no
+PII is retained. For example, a username gets anonymized to something like "<<deleted user>>", maybe with a sequence
+number. This way, the `admin-app` can still show historical data, albeit without the deleted PII.
 
 ## Authentication
 
@@ -141,7 +141,7 @@ Admins must maintain the list of known admins, as well as the list of known trai
 address, which will be returned by the external login providers. **Only** known, active admins may successfully log in
 to the `admin-app`, and **only** known, active trainers may successfully log in to the `trainer-app`. If another person
 attempts to log in to any app that they're not whitelisted for, they will see an appropriate error message in the
-frontend (even if the login _technically_ was okay from the login provider's view). No session is created in this case. 
+frontend (even if the login _technically_ was okay from the login provider's view). No session is created in this case.
 
 The `api-service` provides the return URLs for the login flows of  each of the providers, and manages session cookies
 with appropriate lifetimes. This allows the frontends to be almost "oblivious" of the whole login flow, as we're using
