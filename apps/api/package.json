@@ -1,0 +1,11 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "API spec & definitions",
+  "license": "AGPL-3.0-only",
+  "author": "Roland Hummel <defaude@gmail.com>",
+  "type": "module",
+  "scripts": {
+    "test": "echo Hello, api!"
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "trainer-app",
+  "version": "1.0.0",
+  "description": "Mobile-friendly app trainers can use to track participation of individual students",
+  "license": "AGPL-3.0-only",
+  "author": "Roland Hummel <defaude@gmail.com>",
+  "type": "module",
+  "scripts": {
+    "test": "echo Hello, trainer-app!"
+  }
+}
