@@ -55,11 +55,14 @@ Master data includes:
   stays unchanged. The `quota` __can__ become negative, but the `admin-app` will show a warning message banner if this
   is the case (so that `admins` can take action if needed).
 - **Transaction**: Each change to a `student's` quota is stored as a transaction log entry. Each entry contains:
-  - Timestamp
+  - Timestamp, when the transaction was added to the system.
+  - Timestamp, when the reason for the transaction occurred. This is automatically filled for "automatic" transactions
+    (beginning of the month) and for "lesson" transactions (referring to the specific lesson's timestamp). It's empty
+    for "manual" transactions created by admins.
   - Type of transaction:
     - "automatic" for `contract`-based top-up
     - "lesson" when the `student` used one or more units of their quota
-    - "manual" correction entry entered by an `admin`. 
+    - "manual" correction entry entered by an `admin`.
   - Unit delta: A positive or negative integer representing the amount of units added to or removed from the `quota`.
   - Issuer: empty for all but "manual" entries. Populated with the `admin's` username that created the correction entry.
   - Description: empty for all but "manual" entries. Free-text field the `admin` can fill when creating a correction.
