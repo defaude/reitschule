@@ -49,7 +49,11 @@ Master data includes:
   current, active `contract`, their quota is increased automatically by the amount specified in the `contract`. Each
   `lesson` unit the `student` participates in (i.e. the `trainer` entered it into the `trainer-app`) reduces the quota
   accordingly. Unused units in a `student's` quota don't automatically vanish, but carry over and accumulate. This way,
-  a `student` can utilize their quota even in case of vacations, sickness, spontaneous cancellations, etc.
+  a `student` can utilize their quota even in case of vacations, sickness, or other spontaneous cancellations. If a
+  `contract` starts in the middle of the month, no automatic quota is added in that month. In this case, an `admin`
+  needs to create an appropriate `transaction` for the onboarding of the student. When a `contract` ends, the quota
+  stays unchanged. The `quota` __can__ become negative, but the `admin-app` will show a warning message banner if this
+  is the case (so that `admins` can take action if needed).
 - **Transaction**: Each change to a `student's` quota is stored as a transaction log entry. Each entry contains:
   - Timestamp
   - Type of transaction:
