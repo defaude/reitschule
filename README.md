@@ -59,6 +59,28 @@ Master data includes:
   `trainers` can not modify the information they've entered anymore. An `admin` can add corrective `lesson` entries if
   the `trainer's` data was incomplete or incorrect, even if the month has already been closed.
 
+## Report generation
+
+Generation of reports is a manually triggered by an admin. It's a one-off aggregation of the current state of data in
+the system. Examples of reports are (but there might be other use-cases in the future):
+- list of all lesson units a specific trainer gave (in a month)
+- list of all lesson units a specific horse was used for (in a month)
+- list of all lesson units a specific student took (in a month)
+- list of all quota transactions of a specific student's quota (over a longer period, maybe even the whole contract
+  duration)
+
+## PII, data minimization, data retention
+
+Only the absolutely minimal amount of personally identifiable information (PII) is collected and stored, where it's
+needed for the school's business processes. This includes admin's and trainer's names and e-mail addresses. For
+students, only the name is stored. Every other information the school might have on any person, be it admin, trainer, or
+student, is not stored in this system, but needs to be maintained elsewhere!
+
+By default, no information is deleted. When an admin, trainer or student stops interacting with the school, their
+information remains as it's part of the school's business processes. If a user requests to use their right to be
+forgotten, their database entry does not get deleted, but updated so that no PII is retained. For example, their
+username gets anonymized to something like "<<deleted user>>", maybe with a number.
+
 ## Authentication
 
 We're using external login providers through OAuth 2.0 and/or OpenID Connect. Each frontend application makes an initial
