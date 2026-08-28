@@ -35,7 +35,8 @@ Master data includes:
   and for how long (i.e. how many `quota` units the student used). For example: The trainer creates a `lesson` that took
   90 minutes. `Students` Anna, Bob and Charlotte participated overall. Anna was there for the full 90 minutes, Bob only
   for the second half and Charlotte for the first half. This means Anna's `quota` is reduced by 2, while Bob's and
-  Charlotte's is reduced by 1. A `student's` participation in a `lesson` is always tied to one of the `horses`.
+  Charlotte's is reduced by 1. A `student's` participation in a `lesson` is always tied to one of the `horses`. A
+  `student` can only have one participation entry belonging to a `lesson`.
 - **Admin**: A user that is allowed to log in to the `admin-app`. The `api` allows them CRUD basically all data. They
   belong to the `school` and are trusted.
 - **Trainer**: A user that can only log in to the `trainer-app`. The `api` only allows them to access the information
