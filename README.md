@@ -3,15 +3,16 @@
 ## Description
 
 Riding schools often have quota-based contracts with their students. This means the students pay a monthly fee, and can
-take two riding class units per week, for example. At the same time, trainers are often freelancers and have very
-individual contracts with the schools. Keeping track which student took how many classes, with which trainer, is often
+take two riding lesson units per week, for example. At the same time, trainers are often freelancers and have very
+individual contracts with the schools. Keeping track which student took how many lessons, with which trainer, is often
 complicated and error-prone. We want to fix that by having a simple app where trainers can input the information about
-amounts classes that took place (with which students, with which horses) - ideally directly on their phones while still
-on-site. Plus another app that allows the school's admins to gather all information, generate reports (per-trainer,
-per-student, per-horse, etc.), and maintain master data.
+amounts of lessons that took place (with which students, with which horses) - ideally directly on their phones while
+still on-site. Plus another app that allows the school's admins to gather all information, generate reports
+(per-trainer, per-student, per-horse, etc.), and maintain master data.
 
 Master data includes:
-- Which trainers are active at the school?
+= Which admin users exist? (user management)
+- Which trainers are active at the school? (user management)
 - Which students are active customers at the school - and what quota is available to each one?
 - Which school horses are available?
 
@@ -21,25 +22,27 @@ Master data includes:
 - **api-service**: A PHP-based implementation incl. a database connection. Implements the endpoints defined in `api`.
 - **admin-app**: Back-office frontend application where admins can maintain all master data, but also create monthly
   reports. It uses the endpoints provided by the `api-service`, following the spec in `api`.
-- **trainer-app**: Dedicated mobile-friendly frontend to help trainers submit information about riding classes that
+- **trainer-app**: Dedicated mobile-friendly frontend to help trainers submit information about riding lessons that
   took place. It uses the endpoints provided by the `api-service`, following the spec in `api`.
 
 ## Domain entities
 
 - **School**: The riding school.
-- **Horse**: Information on each horse that's being used for riding `classes` with `students`. 
+- **Horse**: Information on each horse that's being used for riding `lessons` with `students`.
+- **Lesson**: When a student participates in a riding class with one of the `trainers` on one of the `horses`, it's a
+  lesson, which is deducted from the student's quota. One quota unit of such a lesson is 45 minutes.
 - **Admin**: A user that is allowed to log in to the `admin-app`. The `api` allows them CRUD basically all data. They
   belong to the `school` and are trusted.
 - **Trainer**: A user that can only log in to the `trainer-app`. The `api` only allows them to access the information
-  they need to work with their classes/horses/students, but nothing else. They are affiliated with the `school`, but are
+  they need to work with their lessons/horses/students, but nothing else. They are affiliated with the `school`, but are
   generally considered "external" contractors.
-- **Student**: Has a `contract` with a specific monthly `quota`. Takes `classes` with `trainers` and `horses`.
+- **Student**: Has a `contract` with a specific monthly `quota`. Takes `lessons` with `trainers` and `horses`.
 - **Contract**: Agreement between a `student` and the `school`. It specifies the default `quota` that a `student` is
   given each month. A contract always has a start date. If it's the current, active contract, there is no end date. A
   contract can be terminated (deactivated), at which point the end date is stored.
-- **Quota**: Belongs to a specific `student` and defines how many `classes` the student can take in a given time-frame.
-  The quota is automatically topped up by the student's current active `contract` each month, if there is one. Each
-  `class` the student takes (i.e. the trainer entered it into the `trainer-app`) reduces the quota. 
+- **Quota**: Belongs to a specific `student` and defines how many `lesson` units the student can take in a given
+  time-frame. The quota is automatically topped up by the student's current active `contract` each month, if there is
+  one. Each `lesson` unit the student takes (i.e. the trainer entered it into the `trainer-app`) reduces the quota. 
 
 ## Authentication
 
