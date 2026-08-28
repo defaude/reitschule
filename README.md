@@ -29,20 +29,23 @@ Master data includes:
 
 - **School**: The riding school.
 - **Horse**: Information on each horse that's being used for riding `lessons` with `students`.
-- **Lesson**: When a student participates in a riding class with one of the `trainers` on one of the `horses`, it's a
-  lesson, which is deducted from the student's quota. One quota unit of such a lesson is 45 minutes.
+- **Lesson**: When a `student` participates in a riding class with one of the `trainers` on one of the `horses`, it's a
+  lesson, which is deducted from the `student's` `quota`. One `quota` unit of such a lesson is usually 45 minutes. If
+  the `student` takes a double lesson of 90 minutes, for example, two units are taken from their `quota`.
 - **Admin**: A user that is allowed to log in to the `admin-app`. The `api` allows them CRUD basically all data. They
   belong to the `school` and are trusted.
 - **Trainer**: A user that can only log in to the `trainer-app`. The `api` only allows them to access the information
-  they need to work with their lessons/horses/students, but nothing else. They are affiliated with the `school`, but are
-  generally considered "external" contractors.
+  they need to work with their `lessons` / `horses` / `students`, but nothing else. They are affiliated with the
+  `school`, but are generally considered external contractors.
 - **Student**: Has a `contract` with a specific monthly `quota`. Takes `lessons` with `trainers` and `horses`.
 - **Contract**: Agreement between a `student` and the `school`. It specifies the default `quota` that a `student` is
   given each month. A contract always has a start date. If it's the current, active contract, there is no end date. A
   contract can be terminated (deactivated), at which point the end date is stored.
-- **Quota**: Belongs to a specific `student` and defines how many `lesson` units the student can take in a given
-  time-frame. The quota is automatically topped up by the student's current active `contract` each month, if there is
-  one. Each `lesson` unit the student takes (i.e. the trainer entered it into the `trainer-app`) reduces the quota. 
+- **Quota**: Is basically the "bank account" of `lesson` units a `student` can take. If the `student` has a current,
+  active `contract`, their quota is increased automatically by the amount specified in the `contract`. Each `lesson`
+  unit the `student` participates in (i.e. the `trainer` entered it into the `trainer-app`) reduces the quota. Unused
+  units in a `student's` quota don't automatically vanish, but carry over and accumulate. This way, a `student` can
+  utilize their quota even in case of vacations, sickness, spontaneous cancellations, etc.
 
 ## Authentication
 
