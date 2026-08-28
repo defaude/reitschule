@@ -83,7 +83,7 @@ If a new contract starts on the 1st day of the month, the automatic transaction 
 
 If a contract starts at a later day in the month, no automatic transaction is added in that month. In this case, an
 admin needs to create an appropriate transaction for the onboarding of the student manually. When a contract ends, the
-quota stays unchanged. The quota __can__ become negative, but the `admin-app` will show a warning message banner if this
+quota stays unchanged. The quota _can_ become negative, but the `admin-app` will show a warning message banner if this
 is the case (so that admins can take action if needed).
 
 Each lesson a student participates in a lesson (i.e. a trainer or an admin adds a participation entry), results in a
