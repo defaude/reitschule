@@ -10,6 +10,9 @@ information about amounts of lessons that took place (with which students, with 
 their phones while still on-site. Plus another app that allows the school's admins to gather all information, generate
 reports (per-trainer, per-student, per-horse, etc.), and maintain master data.
 
+Note that this system is **not** intended as compensation calculator for trainers! This system only tracks the amount
+of lessons a trainer provided. Compensation, contractual details, and so on, must be tracked elsewhere.
+
 Master data includes:
 - Which admin users exist? (user management)
 - Which trainers are active at the school? (user management)
@@ -127,6 +130,12 @@ We're using external login providers through OAuth 2.0 and/or OpenID Connect. Ea
 request to a dedicated endpoint of the `api-service` to check if the user is authenticated, before rendering any part of
 the actual application and/or providing access to any information whatsoever. Non-authenticated users only see a "login"
 page that provides several "social login" buttons like "Sign in with Google", "Sign in with Microsoft", and so on.
+
+Admins must maintain the list of known admins, as well as the list of known trainers; each with their e-mail address
+which will be returned by the external login providers. **Only** known, active admins may successfully log in to the
+`admin-app`, and **only** known, active trainers may successfully log in to the `trainer-app`. If another person
+attempts to log in to any app that they're not whitelisted for, they will see an appropriate error message in the
+frontend (even if the login _technically_ was okay from the login provider's view). No session is created in this case. 
 
 The `api-service` provides the return URLs for the login flows of  each of the providers, and manages session cookies
 with appropriate lifetimes. This allows the frontends to be almost "oblivious" of the whole login flow, as we're using
