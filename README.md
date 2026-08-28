@@ -6,14 +6,15 @@ Riding schools often have quota-based contracts with their students. This means 
 can participate in riding lesson units up to an agreed-upon quota. At the same time, trainers are often freelancers and
 have very individual contracts with the schools. Keeping track which student took how many lessons, with which trainer,
 is often complicated and error-prone. We want to fix that by having a simple app where trainers can input the
-information about amounts of lessons that took place (with which students, with which horses) - ideally directly on
-their phones while still on-site. Plus another app that allows the school's admins to gather all information, generate
-reports (per-trainer, per-student, per-horse, etc.), and maintain master data.
+information about lessons that took place (with which students, with which horses) - ideally directly on their phones
+while still on-site. Plus another app that allows the school's admins to gather all information, generate reports
+(per-trainer, per-student, per-horse, etc.), and maintain master data.
 
 Note that this system is **not** intended as compensation calculator for trainers! This system only tracks the amount
 of lessons a trainer provided. Compensation, contractual details, and so on, must be tracked elsewhere.
 
 Master data includes:
+
 - Which admin users exist? (user management)
 - Which trainers are active at the school? (user management)
 - Which students are active customers at the school - and what quota is available to each one?
@@ -34,8 +35,9 @@ Master data includes:
 - **Horse**: Information on each horse that's being used for riding `lessons` with `students`. A horse can either be
   "active" or "inactive". Only active horses show up as options in the `trainer-app` for new `participation` entries.
 - **Lesson**: Is created by a `trainer` (or an `admin` if the trainer misses to input their data on time). It contains
-  the date and timespan when the `trainer` held a lesson for one or more `students`. `Trainers` can only see and 
-  manipulate their onw lessons and `participation` entries - and only before the month has been "closed" by an `admin`.
+  the start timestamp and duration when the `trainer` held a lesson for one or more `students`. `Trainers` can only see
+  and manipulate their onw lessons and `participation` entries - and only before the month has been "closed" by an
+  `admin`.
 - **Participation**: A `trainer` (or `admin`) must input each `student` that participated in a `lesson` with which horse
   and for how long (i.e. how many `quota` units the student used). For example: The trainer creates a `lesson` that took
   90 minutes. `Students` Anna, Bob and Charlotte participated overall. Anna was there for the full 90 minutes, Bob only
@@ -44,7 +46,7 @@ Master data includes:
   `student` can only have one participation entry belonging to a `lesson`.
 - **Admin**: A user that is allowed to log in to the `admin-app`. The `api` allows them CRUD basically all data. They
   belong to the `school` and are trusted. An admin user can be made inactive, even without deleting the entry. Inactive
-  admins can not log in to the `admin-app` and not access or modify any data in the system.
+  admins cannot log in to the `admin-app` and not access or modify any data in the system.
 - **Trainer**: A user that can only log in to the `trainer-app`. The `api` only allows them to access the information
   they need to work with their `lessons` / `horses` / `students`, but nothing else. They are affiliated with the
   `school`, but are generally considered external contractors. Just like admins, trainers can be made inactive and lose
@@ -99,9 +101,10 @@ the trainer's data was incomplete or incorrect, even if the month has already be
 
 A report is not a persisted document, but a manually-triggered data aggregation. Reports are displayed in the
 `admin-app` directly in a table, with frontend-only filtering and sorting for usability. No export or download
-functionality for exports is needed at the moment.
+functionality is needed at the moment.
 
 Some examples of reports are (but there might be other use-cases in the future):
+
 - list of all lessons a specific trainer gave (in a month)
 - list of all participation units a specific horse was used for (in a month)
 - list of all participation units a specific student used (in a month)
