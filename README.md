@@ -2,13 +2,13 @@
 
 ## Description
 
-Riding schools often have quota-based contracts with their students. This means the students pay a monthly fee, and can
-take two riding lesson units per week, for example. At the same time, trainers are often freelancers and have very
-individual contracts with the schools. Keeping track which student took how many lessons, with which trainer, is often
-complicated and error-prone. We want to fix that by having a simple app where trainers can input the information about
-amounts of lessons that took place (with which students, with which horses) - ideally directly on their phones while
-still on-site. Plus another app that allows the school's admins to gather all information, generate reports
-(per-trainer, per-student, per-horse, etc.), and maintain master data.
+Riding schools often have quota-based contracts with their students. This means the students pay a subscription fee, and
+can participate in riding lesson units up to an agreed-upon quota. At the same time, trainers are often freelancers and
+have very individual contracts with the schools. Keeping track which student took how many lessons, with which trainer,
+is often complicated and error-prone. We want to fix that by having a simple app where trainers can input the
+information about amounts of lessons that took place (with which students, with which horses) - ideally directly on
+their phones while still on-site. Plus another app that allows the school's admins to gather all information, generate
+reports (per-trainer, per-student, per-horse, etc.), and maintain master data.
 
 Master data includes:
 - Which admin users exist? (user management)
@@ -44,28 +44,43 @@ Master data includes:
 - **Student**: Has a `contract` with a specific monthly `quota`. Participates in `lessons` with `trainers` and `horses`.
 - **Contract**: Agreement between a `student` and the `school`. It specifies the default `quota` that a `student` is
   given each month. A contract always has a start date. If it's the current, active contract, there is no end date. A
-  contract can be terminated (deactivated), at which point the end date is stored.
+  contract can be terminated (deactivated), at which point the end date is stored. A `student` can only have one active
+  contract at any given time.
 - **Quota**: Is basically the "bank account" of `participation` units a `student` can take. If the `student` has a
-  current, active `contract`, their quota is increased automatically by the amount specified in the `contract`. Each
-  `lesson` unit the `student` participates in (i.e. the `trainer` entered it into the `trainer-app`) reduces the quota
-  accordingly. Unused units in a `student's` quota don't automatically vanish, but carry over and accumulate. This way,
-  a `student` can utilize their quota even in case of vacations, sickness, or other spontaneous cancellations. If a
-  `contract` starts in the middle of the month, no automatic quota is added in that month. In this case, an `admin`
-  needs to create an appropriate `transaction` for the onboarding of the student. When a `contract` ends, the quota
-  stays unchanged. The `quota` __can__ become negative, but the `admin-app` will show a warning message banner if this
-  is the case (so that `admins` can take action if needed).
+  current, active `contract`, their quota is increased automatically by the amount specified in the `contract`. Unused
+  units in a `student's` quota don't automatically vanish, but carry over and accumulate. This way, a `student` can
+  utilize their quota even in case of vacations, sickness, or other spontaneous cancellations. One quota unit
+- corresponds to 45 minutes. Only full quota units are supported.
 - **Transaction**: Each change to a `student's` quota is stored as a transaction log entry. Each entry contains:
-  - Timestamp, when the transaction was added to the system.
-  - Timestamp, when the reason for the transaction occurred. This is automatically filled for "automatic" transactions
-    (beginning of the month) and for "lesson" transactions (referring to the specific lesson's timestamp). It's empty
-    for "manual" transactions created by admins.
-  - Type of transaction:
-    - "automatic" for `contract`-based top-up
+  - Timestamp: when the transaction was added to the system.
+  - Reference: ID of the contract or ID of the lesson this transaction is automatically based on. Empty for "manual"
+    transactions.
+  - Type:
+    - "contract" for automatic `contract`-based top-up
     - "lesson" when the `student` used one or more units of their quota
     - "manual" correction entry entered by an `admin`.
   - Unit delta: A positive or negative integer representing the amount of units added to or removed from the `quota`.
-  - Issuer: empty for all but "manual" entries. Populated with the `admin's` username that created the correction entry.
-  - Description: empty for all but "manual" entries. Free-text field the `admin` can fill when creating a correction.
+  - Issuer: Empty for all but "manual" entries. Populated with the `admin's` username that created the correction entry.
+  - Description: Empty for all but "manual" entries. Free-text field the `admin` can fill when creating a correction.
+
+## Quota transactions
+
+If a student has an active contract at the beginning of a month, a "contract" transaction is created that increases the
+student's quota by the amount that is defined in the contract. Such a "contract" transaction is only created once per
+contract per month.
+
+If a new contract starts on the 1st day of the month, the automatic transaction to top up the student's quote is added.
+
+If a contract starts at a later day in the month, no automatic transaction is added in that month. In this case, an
+admin needs to create an appropriate transaction for the onboarding of the student manually. When a contract ends, the
+quota stays unchanged. The quota __can__ become negative, but the `admin-app` will show a warning message banner if this
+is the case (so that admins can take action if needed).
+
+Each lesson a student participates in a lesson (i.e. a trainer or an admin adds a participation entry), results in a
+"lesson" transaction with the amount of units from the participation entry. It reduces the student's quota accordingly.
+If the participation entry gets modified, the transaction is updated, as well. No additional timestamp for the change
+needs to be recorded. If the participation entry is removed, the transaction is removed as well.
+
 
 ## Closing & Report generation
 
