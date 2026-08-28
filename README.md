@@ -46,6 +46,18 @@ Master data includes:
   unit the `student` participates in (i.e. the `trainer` entered it into the `trainer-app`) reduces the quota. Unused
   units in a `student's` quota don't automatically vanish, but carry over and accumulate. This way, a `student` can
   utilize their quota even in case of vacations, sickness, spontaneous cancellations, etc.
+- **Transaction**: Each change to a `student's` quota is stored as a transaction log entry. Each entry contains:
+  - Timestamp
+  - Type of transaction:
+    - "automatic" for `contract`-based top-up
+    - "lesson" when the `student` used one or more units of their quota
+    - "manual" correction entry entered by an `admin`. 
+  - Unit delta: A positive or negative integer representing the amount of units added to or removed from the `quota`.
+  - Issuer: empty for all but "manual" entries. Populated with the `admin's` username that created the correction entry.
+  - Description: empty for all but "manual" entries. Free-text field the `admin` can fill when creating a correction.
+- **Closing**: After the end of a month, an `admin` can close the month's data regarding `lessons`. After this moment,
+  `trainers` can not modify the information they've entered anymore. An `admin` can add corrective `lesson` entries if
+  the `trainer's` data was incomplete or incorrect, even if the month has already been closed.
 
 ## Authentication
 
