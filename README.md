@@ -10,7 +10,7 @@ information about lessons that took place (with which students, with which horse
 while still on-site. Plus another app that allows the school's admins to gather all information, generate reports
 (per-trainer, per-student, per-horse, etc.), and maintain master data.
 
-Note that this system is **not** intended as compensation calculator for trainers! This system only tracks the amount
+Note that this system is **not** intended as a compensation calculator for trainers! This system only tracks the amount
 of lessons a trainer provided. Compensation, contractual details, and so on, must be tracked elsewhere.
 
 Master data includes:
@@ -31,12 +31,13 @@ Master data includes:
 
 ## Domain entities
 
-- **School**: The riding school.
+- **School**: The riding school. The whole system runs in the context of one school. If another school wants to use this
+  system, a completely separate, independent deployment needs to be set up
 - **Horse**: Information on each horse that's being used for riding `lessons` with `students`. A horse can either be
   "active" or "inactive". Only active horses show up as options in the `trainer-app` for new `participation` entries.
 - **Lesson**: Is created by a `trainer` (or an `admin` if the trainer misses to input their data on time). It contains
   the start timestamp and duration when the `trainer` held a lesson for one or more `students`. `Trainers` can only see
-  and manipulate their onw lessons and `participation` entries - and only before the month has been "closed" by an
+  and manipulate their own lessons and `participation` entries - and only before the month has been "closed" by an
   `admin`.
 - **Participation**: A `trainer` (or `admin`) must input each `student` that participated in a `lesson` with which horse
   and for how long (i.e. how many `quota` units the student used). For example: The trainer creates a `lesson` that took
@@ -46,7 +47,8 @@ Master data includes:
   `student` can only have one participation entry belonging to a `lesson`.
 - **Admin**: A user that is allowed to log in to the `admin-app`. The `api` allows them CRUD basically all data. They
   belong to the `school` and are trusted. An admin user can be made inactive, even without deleting the entry. Inactive
-  admins cannot log in to the `admin-app` and not access or modify any data in the system.
+  admins cannot log in to the `admin-app` or access or modify any data in the system. The first admin is created as part
+  of the initial deployment. Subsequent admins should be maintained in the `admin-app`.
 - **Trainer**: A user that can only log in to the `trainer-app`. The `api` only allows them to access the information
   they need to work with their `lessons` / `horses` / `students`, but nothing else. They are affiliated with the
   `school`, but are generally considered external contractors. Just like admins, trainers can be made inactive and lose
@@ -62,18 +64,19 @@ Master data includes:
   current, active `contract`, their quota is increased automatically by the amount specified in the `contract`. Unused
   units in a `student's` quota don't automatically vanish, but carry over and accumulate. This way, a `student` can
   utilize their quota even in case of vacations, sickness, or other spontaneous cancellations. One quota unit
-- corresponds to 45 minutes. Only full quota units are supported.
-- **Transaction**: Each change to a `student's` quota is stored as a transaction log entry. Each entry contains:
+  corresponds to 45 minutes. Only full quota units are supported.
+- **Transaction**: Each change to a `student's` quota is stored as a transaction entry. Each entry contains:
   - Timestamp: when the transaction was added to the system.
-  - Reference: ID of the contract or ID of the lesson this transaction is automatically based on. Empty for "manual"
-    transactions.
+  - Reference: ID of the contract or ID of the participation this transaction is automatically based on. Empty for
+    "manual" transactions.
   - Type:
     - "contract" for automatic `contract`-based top-up
-    - "lesson" when the `student` used one or more units of their quota
+    - "participation" when the `student` used one or more units of their quota
     - "manual" correction entry entered by an `admin`.
   - Unit delta: A positive or negative integer representing the amount of units added to or removed from the `quota`.
   - Issuer: Empty for all but "manual" entries. Populated with the `admin's` username that created the correction entry.
-  - Description: Empty for all but "manual" entries. Free-text field the `admin` can fill when creating a correction.
+  - Description: Empty for all but "manual" entries. Free-text field the `admin` may or may not fill when creating a
+    correction.
 
 ## Quota transactions
 
@@ -88,10 +91,10 @@ admin needs to create an appropriate transaction for the onboarding of the stude
 quota stays unchanged. The quota _can_ become negative, but the `admin-app` will show a warning message banner if this
 is the case (so that admins can take action if needed).
 
-Each lesson a student participates in a lesson (i.e. a trainer or an admin adds a participation entry), results in a
-"lesson" transaction with the amount of units from the participation entry. It reduces the student's quota accordingly.
-If the participation entry gets modified, the transaction is updated, as well. No additional timestamp for the change
-needs to be recorded. If the participation entry is removed, the transaction is removed as well.
+Each lesson a student participates in (i.e. a trainer or an admin adds a participation entry), results in a
+"participation" transaction with the amount of units from the participation entry. It reduces the student's quota
+accordingly. If the participation entry gets modified, the transaction is updated, as well. No additional timestamp for
+the change needs to be recorded. If the participation entry is removed, the transaction is removed as well.
 
 ## Closing & Report generation
 
@@ -134,9 +137,9 @@ request to a dedicated endpoint of the `api-service` to check if the user is aut
 the actual application and/or providing access to any information whatsoever. Non-authenticated users only see a "login"
 page that provides several "social login" buttons like "Sign in with Google", "Sign in with Microsoft", and so on.
 
-Admins must maintain the list of known admins, as well as the list of known trainers; each with their e-mail address
-which will be returned by the external login providers. **Only** known, active admins may successfully log in to the
-`admin-app`, and **only** known, active trainers may successfully log in to the `trainer-app`. If another person
+Admins must maintain the list of known admins, as well as the list of known trainers, each with their verified e-mail
+address, which will be returned by the external login providers. **Only** known, active admins may successfully log in
+to the `admin-app`, and **only** known, active trainers may successfully log in to the `trainer-app`. If another person
 attempts to log in to any app that they're not whitelisted for, they will see an appropriate error message in the
 frontend (even if the login _technically_ was okay from the login provider's view). No session is created in this case. 
 
