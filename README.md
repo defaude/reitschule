@@ -29,23 +29,27 @@ Master data includes:
 
 - **School**: The riding school.
 - **Horse**: Information on each horse that's being used for riding `lessons` with `students`.
-- **Lesson**: When a `student` participates in a riding class with one of the `trainers` on one of the `horses`, it's a
-  lesson, which is deducted from the `student's` `quota`. One `quota` unit of such a lesson is usually 45 minutes. If
-  the `student` takes a double lesson of 90 minutes, for example, two units are taken from their `quota`.
+- **Lesson**: Is created by a `trainer` (or an `admin` if the trainer misses to input their data on time). It contains
+  the date and timespan when the `trainer` held a lesson for one or more `students`.
+- **Participation**: A `trainer` (or `admin`) must input each `student` that participated in a `lesson` with which horse
+  and for how long (i.e. how many `quota` units the student used). For example: The trainer creates a `lesson` that took
+  90 minutes. `Students` Anna, Bob and Charlotte participated overall. Anna was there for the full 90 minutes, Bob only
+  for the second half and Charlotte for the first half. This means Anna's `quota` is reduced by 2, while Bob's and
+  Charlotte's is reduced by 1.
 - **Admin**: A user that is allowed to log in to the `admin-app`. The `api` allows them CRUD basically all data. They
   belong to the `school` and are trusted.
 - **Trainer**: A user that can only log in to the `trainer-app`. The `api` only allows them to access the information
   they need to work with their `lessons` / `horses` / `students`, but nothing else. They are affiliated with the
   `school`, but are generally considered external contractors.
-- **Student**: Has a `contract` with a specific monthly `quota`. Takes `lessons` with `trainers` and `horses`.
+- **Student**: Has a `contract` with a specific monthly `quota`. Participates in `lessons` with `trainers` and `horses`.
 - **Contract**: Agreement between a `student` and the `school`. It specifies the default `quota` that a `student` is
   given each month. A contract always has a start date. If it's the current, active contract, there is no end date. A
   contract can be terminated (deactivated), at which point the end date is stored.
-- **Quota**: Is basically the "bank account" of `lesson` units a `student` can take. If the `student` has a current,
-  active `contract`, their quota is increased automatically by the amount specified in the `contract`. Each `lesson`
-  unit the `student` participates in (i.e. the `trainer` entered it into the `trainer-app`) reduces the quota. Unused
-  units in a `student's` quota don't automatically vanish, but carry over and accumulate. This way, a `student` can
-  utilize their quota even in case of vacations, sickness, spontaneous cancellations, etc.
+- **Quota**: Is basically the "bank account" of `participation` units a `student` can take. If the `student` has a
+  current, active `contract`, their quota is increased automatically by the amount specified in the `contract`. Each
+  `lesson` unit the `student` participates in (i.e. the `trainer` entered it into the `trainer-app`) reduces the quota
+  accordingly. Unused units in a `student's` quota don't automatically vanish, but carry over and accumulate. This way,
+  a `student` can utilize their quota even in case of vacations, sickness, spontaneous cancellations, etc.
 - **Transaction**: Each change to a `student's` quota is stored as a transaction log entry. Each entry contains:
   - Timestamp
   - Type of transaction:
@@ -55,19 +59,23 @@ Master data includes:
   - Unit delta: A positive or negative integer representing the amount of units added to or removed from the `quota`.
   - Issuer: empty for all but "manual" entries. Populated with the `admin's` username that created the correction entry.
   - Description: empty for all but "manual" entries. Free-text field the `admin` can fill when creating a correction.
-- **Closing**: After the end of a month, an `admin` can close the month's data regarding `lessons`. After this moment,
-  `trainers` can not modify the information they've entered anymore. An `admin` can add corrective `lesson` entries if
-  the `trainer's` data was incomplete or incorrect, even if the month has already been closed.
 
-## Report generation
+## Closing & Report generation
+
+After the end of a month, an admin can close the month's data regarding lessons and participations. After this moment,
+the month's data becomes immutable for trainers. An admin can add corrective lesson or participation entries if the
+trainer's data was incomplete or incorrect, even if the month has already been closed.
 
 Generation of reports is a manually triggered by an admin. It's a one-off aggregation of the current state of data in
 the system. Examples of reports are (but there might be other use-cases in the future):
-- list of all lesson units a specific trainer gave (in a month)
-- list of all lesson units a specific horse was used for (in a month)
-- list of all lesson units a specific student took (in a month)
+- list of all lessons a specific trainer gave (in a month)
+- list of all participation units a specific horse was used for (in a month)
+- list of all participation units a specific student used (in a month)
 - list of all quota transactions of a specific student's quota (over a longer period, maybe even the whole contract
   duration)
+
+Reports are displayed in the `admin-app` directly in a table, with frontend-only filtering and sorting for usability. No
+export / download functionality for exports is needed at the moment.
 
 ## PII, data minimization, data retention
 
