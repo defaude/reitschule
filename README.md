@@ -11,7 +11,7 @@ still on-site. Plus another app that allows the school's admins to gather all in
 (per-trainer, per-student, per-horse, etc.), and maintain master data.
 
 Master data includes:
-= Which admin users exist? (user management)
+- Which admin users exist? (user management)
 - Which trainers are active at the school? (user management)
 - Which students are active customers at the school - and what quota is available to each one?
 - Which school horses are available?
@@ -35,7 +35,7 @@ Master data includes:
   and for how long (i.e. how many `quota` units the student used). For example: The trainer creates a `lesson` that took
   90 minutes. `Students` Anna, Bob and Charlotte participated overall. Anna was there for the full 90 minutes, Bob only
   for the second half and Charlotte for the first half. This means Anna's `quota` is reduced by 2, while Bob's and
-  Charlotte's is reduced by 1.
+  Charlotte's is reduced by 1. A `student's` participation in a `lesson` is always tied to one of the `horses`.
 - **Admin**: A user that is allowed to log in to the `admin-app`. The `api` allows them CRUD basically all data. They
   belong to the `school` and are trusted.
 - **Trainer**: A user that can only log in to the `trainer-app`. The `api` only allows them to access the information
@@ -69,20 +69,21 @@ Master data includes:
 
 ## Closing & Report generation
 
-After the end of a month, an admin can close the month's data regarding lessons and participations. After this moment,
+After the end of a month, an admin can close the month's data regarding lessons and participation. After this moment,
 the month's data becomes immutable for trainers. An admin can add corrective lesson or participation entries if the
 trainer's data was incomplete or incorrect, even if the month has already been closed.
 
-Generation of reports is a manually triggered by an admin. It's a one-off aggregation of the current state of data in
-the system. Examples of reports are (but there might be other use-cases in the future):
+A report is not a persisted document, but a manually-triggered data aggregation. Reports are displayed in the
+`admin-app` directly in a table, with frontend-only filtering and sorting for usability. No export or download
+functionality for exports is needed at the moment.
+
+Some examples of reports are (but there might be other use-cases in the future):
 - list of all lessons a specific trainer gave (in a month)
 - list of all participation units a specific horse was used for (in a month)
 - list of all participation units a specific student used (in a month)
 - list of all quota transactions of a specific student's quota (over a longer period, maybe even the whole contract
   duration)
 
-Reports are displayed in the `admin-app` directly in a table, with frontend-only filtering and sorting for usability. No
-export / download functionality for exports is needed at the moment.
 
 ## PII, data minimization, data retention
 
@@ -91,10 +92,14 @@ needed for the school's business processes. This includes admin's and trainer's 
 students, only the name is stored. Every other information the school might have on any person, be it admin, trainer, or
 student, is not stored in this system, but needs to be maintained elsewhere!
 
+Trainers can see all data on students and horses. No fine-grained access control mechanism needed.
+
 By default, no information is deleted. When an admin, trainer or student stops interacting with the school, their
-information remains as it's part of the school's business processes. If a user requests to use their right to be
-forgotten, their database entry does not get deleted, but updated so that no PII is retained. For example, their
-username gets anonymized to something like "<<deleted user>>", maybe with a number.
+information remains as it's part of the school's business processes. When personal data must no longer be retained,
+identifying attributes are anonymized while non-personal historical records remain intact. This means database entries
+do not get deleted, but updated so that no PII is retained. For example, a username gets anonymized to something like
+"<<deleted user>>", maybe with a sequence number. This way, the `admin-app` can still show historical data, albeit
+without the deleted PII.  Users that have been removed this way can not be selected as participants in lessons anymore.
 
 ## Authentication
 
