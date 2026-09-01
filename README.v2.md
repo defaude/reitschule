@@ -4,6 +4,9 @@ Dieser Entwurf beschreibt den fachlichen Kern des ersten Inkrements. Es digitali
 die monatliche Abrechnung der Trainer. Schülerabrechnung, Vertragsverwaltung und die automatische Prüfung von
 Nachholberechtigungen folgen bewusst später.
 
+Die Anwendung ist bewusst eine eigenständige Insellösung. Schnittstellen oder ein Datenaustausch mit Drittsystemen sind
+nicht vorgesehen.
+
 ## Domänenentitäten
 
 - **Schule**: Der Verein beziehungsweise die Reitschule, in deren Kontext alle Daten geführt werden. Eine Installation
@@ -61,7 +64,7 @@ verändert.
 - Nachholstunden werden zunächst nur gekennzeichnet und optional mit dem Datum der versäumten Einheit versehen.
 - Die Einhaltung von Anmeldefrist, Papiernachweis und Nachholfrist wird noch nicht automatisch geprüft.
 - Ein allgemeines Quota-Konto mit austauschbaren 45-Minuten-Einheiten wird nicht eingeführt.
-- Schülerverträge, Schülertarife, Lastschriften, Lexware-Integration und Zahlungsstatus folgen später.
+- Schülerverträge und Schülertarife folgen später.
 - Historische Stammdaten bleiben erhalten; nicht mehr benötigte personenbezogene Daten werden anonymisiert statt
   fachliche Historie zu löschen.
 
