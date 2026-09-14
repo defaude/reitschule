@@ -29,91 +29,6 @@ Master data includes:
 - **trainer-app**: Dedicated mobile-friendly frontend to help trainers submit information about riding lessons that
   took place. It uses the endpoints provided by the `api-service`, following the spec in `api`.
 
-## Domain entities
-
-- **School**: The riding school. The whole system runs in the context of one school. If another school wants to use this
-  system, a completely separate, independent deployment needs to be set up.
-- **Horse**: Information on each horse that's being used for riding `lessons` with `students`. A horse can either be
-  "active" or "inactive". Only active horses show up as options in the `trainer-app` for new `participation` entries.
-- **Lesson**: Is created by a `trainer` (or an `admin` if the trainer misses to input their data on time). It contains
-  the start timestamp and duration when the `trainer` held a lesson for one or more `students`. `Trainers` can only see
-  and manipulate their own lessons and `participation` entries - and only before the month has been "closed" by an
-  `admin`.
-- **Participation**: A `trainer` (or `admin`) must input each `student` that participated in a `lesson` with which horse
-  and for how long (i.e. how many `quota` units the student used). For example: The trainer creates a `lesson` that took
-  90 minutes. `Students` Anna, Bob and Charlotte participated overall. Anna was there for the full 90 minutes, Bob only
-  for the second half and Charlotte for the first half. This means Anna's `quota` is reduced by 2, while Bob's and
-  Charlotte's is reduced by 1. A `student's` participation in a `lesson` is always tied to one of the `horses`. A
-  `student` can only have one participation entry belonging to a `lesson`.
-- **Admin**: A user that is allowed to log in to the `admin-app`. The `api` allows them CRUD basically all data. They
-  belong to the `school` and are trusted. An admin user can be made inactive, even without deleting the entry. Inactive
-  admins cannot log in to the `admin-app` or access or modify any data in the system. The first admin is created as part
-  of the initial deployment. Subsequent admins should be maintained in the `admin-app`.
-- **Trainer**: A user that can only log in to the `trainer-app`. The `api` only allows them to access the information
-  they need to work with their `lessons` / `horses` / `students`, but nothing else. They are affiliated with the
-  `school`, but are generally considered external contractors. Just like admins, trainers can be made inactive and lose
-  all access to the `trainer-app` and any data if that's the case.
-- **Student**: Has a `contract` with a specific monthly `quota`. Participates in `lessons` with `trainers` and `horses`.
-  A student can either be "active" or "inactive". Only active students show up in the `trainer-app` as possible
-  candidates when a `participation` entry is created.
-- **Contract**: Agreement between a `student` and the `school`. It specifies the default `quota` that a `student` is
-  given each month. A contract always has a start date. If it's the current, active contract, there is no end date. A
-  contract can be terminated (deactivated), at which point the end date is stored. A `student` can only have one active
-  contract at any given time.
-- **Quota**: Is basically the "bank account" of `participation` units a `student` can take. If the `student` has a
-  current, active `contract`, their quota is increased automatically by the amount specified in the `contract`. Unused
-  units in a `student's` quota don't automatically vanish, but carry over and accumulate. This way, a `student` can
-  utilize their quota even in case of vacations, sickness, or other spontaneous cancellations. One quota unit
-  corresponds to 45 minutes. Only full quota units are supported.
-- **Transaction**: Each change to a `student's` quota is stored as a transaction entry. Each entry contains:
-  - Timestamp: when the transaction was added to the system.
-  - Reference: ID of the contract or ID of the participation this transaction is automatically based on. Empty for
-    "manual" transactions.
-  - Type:
-    - "contract" for automatic `contract`-based top-up
-    - "participation" when the `student` used one or more units of their quota
-    - "manual" correction entry entered by an `admin`.
-  - Unit delta: A positive or negative integer representing the amount of units added to or removed from the `quota`.
-  - Issuer: Empty for all but "manual" entries. Reference to the `admin` that created the correction entry.
-  - Description: Empty for all but "manual" entries. Free-text field the `admin` may or may not fill when creating a
-    correction.
-
-## Quota transactions
-
-If a student has an active contract at the beginning of a month, a "contract" transaction is created that increases the
-student's quota by the amount that is defined in the contract. Such a "contract" transaction is only created once per
-contract per month.
-
-If a new contract starts on the 1st day of the month, the automatic transaction to top up the student's quota is added.
-
-If a contract starts at a later day in the month, no automatic transaction is added in that month. In this case, an
-admin needs to create an appropriate transaction for the onboarding of the student manually. When a contract ends, the
-quota stays unchanged. The quota _can_ become negative, but the `admin-app` will show a warning message banner if this
-is the case (so that admins can take action if needed).
-
-Each participation entry, results in a "participation" transaction with the amount of units from the participation
-entry. It reduces the student's quota accordingly. If the participation entry gets modified, the transaction is updated,
-as well. No additional timestamp for the change needs to be recorded. If the participation entry is removed, the
-transaction is removed as well.
-
-## Closing & Report generation
-
-After the end of a month, an admin can close the month's data regarding lessons and participation. After this moment,
-the month's data becomes immutable for trainers. An admin can add, edit, or remove lesson or participation entries if
-the trainer's data was incomplete or incorrect, even if the month has already been closed.
-
-A report is not a persisted document, but a manually-triggered data aggregation. Reports are displayed in the
-`admin-app` directly in a table, with frontend-only filtering and sorting for usability. No export or download
-functionality is needed at the moment.
-
-Some examples of reports are (but there might be other use-cases in the future):
-
-- list of all lessons a specific trainer gave (in a month)
-- list of all participation units a specific horse was used for (in a month)
-- list of all participation units a specific student used (in a month)
-- list of all quota transactions of a specific student's quota (over a longer period, maybe even the whole contract
-  duration)
-
 ## PII, data minimization, data retention
 
 Only the absolutely minimal amount of personally identifiable information (PII) is collected and stored, where it's
@@ -160,7 +75,7 @@ directly from the webserver.
 
 ## Local operation / development
 
-Docker compose is used to spin up the `api-service` on a webserver with PHP capabilities similar to the production
+Docker Compose is used to spin up the `api-service` on a webserver with PHP capabilities similar to the production
 environment + a database. Both frontends are running in their Vite dev server and are using its proxy capabilities to
 utilize the endpoints of the running `api-service`.
 
@@ -168,3 +83,8 @@ utilize the endpoints of the running `api-service`.
 - **http://localhost:8234/admin** The local `admin-app`
 - **http://localhost:8345/trainer** The local `trainer-app`
  
+# Specifications
+
+- [v1 (rough draft)](docs/specs/v1.md)
+- [v2 (based on first review comments)](docs/specs/v2.md)
+- [v3 (latest increment)](docs/specs/v3.md)
